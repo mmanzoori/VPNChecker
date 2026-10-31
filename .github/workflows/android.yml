@@ -1,3 +1,4 @@
+
 name: Build VPN Checker APK
 
 on:
@@ -11,6 +12,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -26,13 +31,13 @@ jobs:
         with:
           gradle-version: '8.11.1'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Install Android SDK packages
         run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          yes | sdkmanager --licenses || true
+          sdkmanager --install "platforms;android-36" "build-tools;36.0.0"
 
       - name: Build debug APK
         run: gradle --no-daemon assembleDebug
